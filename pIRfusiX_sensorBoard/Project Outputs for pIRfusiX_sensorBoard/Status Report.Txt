@@ -1,0 +1,10 @@
+Output: Intergraph Netlist
+Type  : IntergraphNetlist
+From  : Project [pIRfusiX_sensorBoard.PrjPcb]
+   Generated File[SensorBoardSchm.NET]
+
+
+Files Generated   : 1
+Documents Printed : 0
+
+Finished Output Generation At 3:49:24 PM On 2021-12-19
