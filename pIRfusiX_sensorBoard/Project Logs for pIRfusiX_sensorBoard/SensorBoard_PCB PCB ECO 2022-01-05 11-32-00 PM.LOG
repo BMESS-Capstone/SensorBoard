@@ -1,0 +1,11 @@
+Removed Pin From Net: NetName=LG Pin=U1-20
+Removed Pin From Net: NetName=LB Pin=U1-21
+Removed Pin From Net: NetName=LR Pin=U1-22
+Added Component: Designator=J2(JST Programmer)
+Added Pin To Net: NetName=3.3V Pin=J2-1
+Added Pin To Net: NetName=GND Pin=J2-5
+Added Pin To Net: NetName=LR Pin=U1-20
+Added Pin To Net: NetName=LG Pin=U1-21
+Added Pin To Net: NetName=LB Pin=U1-22
+Added Member To Class: ClassName=SensorBoardSchm Member=Component J2 ISP_Connector
+Added Room: Name=SensorBoardSchm

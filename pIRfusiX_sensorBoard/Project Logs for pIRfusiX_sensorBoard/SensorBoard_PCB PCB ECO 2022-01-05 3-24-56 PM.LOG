@@ -1,0 +1,3 @@
+Change Component Footprint: Designator=U4 Old Footprint=PQFN065P470X450X260-20N New Footprint=AS7263Footprint
+Added Member To Class: ClassName=SensorBoardSchm Member=Component D1 EAST1616RGBB2
+Added Room: Name=SensorBoardSchm

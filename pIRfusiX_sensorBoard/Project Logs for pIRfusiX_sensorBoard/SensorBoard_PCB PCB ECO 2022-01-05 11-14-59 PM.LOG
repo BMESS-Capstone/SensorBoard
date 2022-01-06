@@ -1,0 +1,19 @@
+Added Component: Designator=J2(JST Programmer)
+Added Component: Designator=J3(JST-B2B-PH-SM4-TB-2_V)
+Add component (AddParameter): Name = "Datasheet URL"; Value = "https://ciiva.com/datasheet-click-26894756?src=ciiva&sig=90099765"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Datasheet Version"; Value = "Dec-12"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Manufacturer"; Value = "JST"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Manufacturer URL"; Value = "http://www.jst.com/home2.html"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "No of Positions"; Value = "2"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Pitch"; Value = "2mm"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Style/Orientation"; Value = "StraightHeader/Plug"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Termination"; Value = "Crimp"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Type"; Value = "ShroudedHeader"; VariantName = "[No Variations]"
+Added Pin To Net: NetName=3.3V Pin=J2-1
+Added Pin To Net: NetName=GND Pin=J2-5
+Added Pin To Net: NetName=VBAT Pin=J3-1
+Added Pin To Net: NetName=GND Pin=J3-2
+Added Member To Class: ClassName=SensorBoardSchm Member=Component J2 ISP_Connector
+Added Member To Class: ClassName=SensorBoardSchm Member=Component J3 B2B-PH-SM4-TB(LF)(SN)
+Added Member To Class: ClassName=SensorBoardSchm Member=Component U1 NINA-B306-00B-00
+Added Room: Name=SensorBoardSchm
