@@ -16,50 +16,52 @@
   - Arduino Nano 33 BLE or custom pIRfusiX PCB board
   
   Interacts with the ESP32 BLE client firmware
+
+  Author: Khaled Elmalawany
 */
 
 #include <ArduinoBLE.h>
 
-// BLE Sensor Services
-BLEService sensorService();
-BLEService connectService("7e161f79-2ce9-46d1-917a-8e20f6b1f675");
+//*****Shared with NANO 33 TODO: move to a common refererred .h file***
+#define BUFFER_SIZE 40
+
+#define TOTAL_POSSIBLE_LOCATIONS 4
+#define LEFT_ARM 0
+#define RIGHT_ARM 1
+#define LEFT_LEG 2
+#define RIGHT_LEG 3
+
+#define CONNECT_UUID "6164e702-7565-11ec-90d6-0242ac120003"
+
+#define SENSOR_CHAR_UUID "fec40b26-757a-11ec-90d6-0242ac120003"
+#define BATTERY_CHAR_UUID "fec40dc4-757a-11ec-90d6-0242ac120003"
+//********************************************************************
+uint8_t location = LEFT_LEG;
+
+// BLE Service (NOTE: Consider moving into setup() to reduce dynamic memory)
+BLEService sensorService(CONNECT_UUID);
 
 // BLE Sensor Data Characteristic
-BLEUnsignedCharCharacteristic sensorChar("175f0001-73f7-11ec-90d6-0242ac120003",  // standard 16-bit characteristic UUID
+BLEUnsignedCharCharacteristic sensorChar(SENSOR_CHAR_UUID,  // standard 16-bit characteristic UUID
     BLERead | BLENotify); // remote clients will be able to get notifications if this characteristic changes
 
 
 // BLE Battery Level Characteristic
-BLEUnsignedCharCharacteristic batteryChar("175f0002-73f7-11ec-90d6-0242ac120003",  // standard 16-bit characteristic UUID
+BLEUnsignedCharCharacteristic batteryChar(BATTERY_CHAR_UUID,  // standard 16-bit characteristic UUID
     BLERead | BLENotify); // remote clients will be able to get notifications if this characteristic changes
-
-// BLE Connection Characteristic
-BLEUnsignedCharCharacteristic connectChar("cc58110b-d173-4a9f-b0d5-1b0dd006c357",  // standard 16-bit characteristic UUID
-    BLERead | BLEWrite | BLENotify); // remote clients will be able to get notifications if this characteristic changes
-
-// Location of the sensor on the body (can be expanded)
-// 0: Unspecified
-// 1: Left Arm
-// 2: Right Arm
-// 3: Left Leg
-// 4: Right leg
-int location = 0;
 
 // Battery global variables
 int oldBatteryLevel = 0;
-long previousMillis = 0;  // last time the battery level was checked, in ms
+long previousMillis = 0;
 
 void setup() {
   Serial.begin(9600);    // initialize serial communication
-  while(Serial.available() == 0) {}
-  while (!Serial);
 
   pinMode(LED_BUILTIN, OUTPUT); // initialize the built-in LED pin to indicate when a central is connected
 
   // begin initialization
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
-
     while (1);
   }
 
@@ -69,10 +71,10 @@ void setup() {
      The name can be changed but maybe be truncated based on space left in advertisement packet
   */
   BLE.setLocalName("pIRfusiX sensor");
-  BLE.setAdvertisedService(connectService); // add the service UUID
-  connectService.addCharacteristic(connectChar); // add the connection characteristic
-  BLE.addService(connectService); // Add the connection service
-  connectChar.writeValue(location); // set initial value for this characteristic
+  BLE.setAdvertisedService(sensorService); // add the service UUID
+  sensorService.addCharacteristic(sensorChar); // add the sensor characteristic
+  sensorService.addCharacteristic(batteryChar); // add the battery characteristic
+  BLE.addService(sensorService); // Add the connection service
 
   /* Start advertising BLE.  It will start continuously transmitting BLE
      advertising packets and will be visible to remote BLE central devices
@@ -88,6 +90,9 @@ void loop() {
   // wait for a BLE central
   BLEDevice central = BLE.central();
 
+  // Variable to read inputs to BLE Characteristics
+  char temp[BUFFER_SIZE];
+
   // if a central is connected to the peripheral:
   if (central) {
     Serial.print("Connected to central: ");
@@ -99,6 +104,7 @@ void loop() {
     // check the battery level every 200ms
     // while the central is connected:
     while (central.connected()) {
+      //**********BATERY*****************
       long currentMillis = millis();
       // if 200ms have passed, check the battery level:
       if (currentMillis - previousMillis >= 200) {
