@@ -1,30 +1,57 @@
 /*
-  Battery Monitor
-  This example creates a BLE peripheral with the standard battery service and
-  level characteristic. The A0 pin is used to calculate the battery level.
+  pIRfusiX sensor BLE firmware
+
+  Service:
+  - sensorService (service encapsulating various characteristics)
+  - connectService (service to ensure the device is unique)
+  
+  Characterstics for sensorService:
+  - sensorChar (sensor value output)
+  - batteryChar (battery voltage remaining)
+
+  Characterstics for connectService:
+  - connectChar (used for connection algorithm)
+
   The circuit:
-  - Arduino MKR WiFi 1010, Arduino Uno WiFi Rev2 board, Arduino Nano 33 IoT,
-    Arduino Nano 33 BLE, or Arduino Nano 33 BLE Sense board.
-  You can use a generic BLE central app, like LightBlue (iOS and Android) or
-  nRF Connect (Android), to interact with the services and characteristics
-  created in this sketch.
-  This example code is in the public domain.
+  - Arduino Nano 33 BLE or custom pIRfusiX PCB board
+  
+  Interacts with the ESP32 BLE client firmware
 */
 
 #include <ArduinoBLE.h>
 
- // BLE Battery Service
-BLEService batteryService("180F");
+// BLE Sensor Services
+BLEService sensorService();
+BLEService connectService("7e161f79-2ce9-46d1-917a-8e20f6b1f675");
 
-// BLE Battery Level Characteristic
-BLEUnsignedCharCharacteristic batteryLevelChar("2A19",  // standard 16-bit characteristic UUID
+// BLE Sensor Data Characteristic
+BLEUnsignedCharCharacteristic sensorChar("175f0001-73f7-11ec-90d6-0242ac120003",  // standard 16-bit characteristic UUID
     BLERead | BLENotify); // remote clients will be able to get notifications if this characteristic changes
 
-int oldBatteryLevel = 0;  // last battery level reading from analog input
+
+// BLE Battery Level Characteristic
+BLEUnsignedCharCharacteristic batteryChar("175f0002-73f7-11ec-90d6-0242ac120003",  // standard 16-bit characteristic UUID
+    BLERead | BLENotify); // remote clients will be able to get notifications if this characteristic changes
+
+// BLE Connection Characteristic
+BLEUnsignedCharCharacteristic connectChar("cc58110b-d173-4a9f-b0d5-1b0dd006c357",  // standard 16-bit characteristic UUID
+    BLERead | BLEWrite | BLENotify); // remote clients will be able to get notifications if this characteristic changes
+
+// Location of the sensor on the body (can be expanded)
+// 0: Unspecified
+// 1: Left Arm
+// 2: Right Arm
+// 3: Left Leg
+// 4: Right leg
+int location = 0;
+
+// Battery global variables
+int oldBatteryLevel = 0;
 long previousMillis = 0;  // last time the battery level was checked, in ms
 
 void setup() {
   Serial.begin(9600);    // initialize serial communication
+  while(Serial.available() == 0) {}
   while (!Serial);
 
   pinMode(LED_BUILTIN, OUTPUT); // initialize the built-in LED pin to indicate when a central is connected
@@ -41,11 +68,11 @@ void setup() {
      and can be used by remote devices to identify this BLE device
      The name can be changed but maybe be truncated based on space left in advertisement packet
   */
-  BLE.setLocalName("BatteryMonitor");
-  BLE.setAdvertisedService(batteryService); // add the service UUID
-  batteryService.addCharacteristic(batteryLevelChar); // add the battery level characteristic
-  BLE.addService(batteryService); // Add the battery service
-  batteryLevelChar.writeValue(oldBatteryLevel); // set initial value for this characteristic
+  BLE.setLocalName("pIRfusiX sensor");
+  BLE.setAdvertisedService(connectService); // add the service UUID
+  connectService.addCharacteristic(connectChar); // add the connection characteristic
+  BLE.addService(connectService); // Add the connection service
+  connectChar.writeValue(location); // set initial value for this characteristic
 
   /* Start advertising BLE.  It will start continuously transmitting BLE
      advertising packets and will be visible to remote BLE central devices
@@ -76,7 +103,7 @@ void loop() {
       // if 200ms have passed, check the battery level:
       if (currentMillis - previousMillis >= 200) {
         previousMillis = currentMillis;
-        updateBatteryLevel();
+        // updateBatteryLevel();
       }
     }
     // when the central disconnects, turn off the LED:
@@ -86,17 +113,17 @@ void loop() {
   }
 }
 
-void updateBatteryLevel() {
-  /* Read the current voltage level on the A0 analog input pin.
-     This is used here to simulate the charge level of a battery.
-  */
-  int battery = analogRead(A0);
-  int batteryLevel = map(battery, 0, 1023, 0, 100);
+// void updateBatteryLevel() {
+//   /* Read the current voltage level on the A0 analog input pin.
+//      This is used here to simulate the charge level of a battery.
+//   */
+//   int battery = analogRead(A0);
+//   int batteryLevel = map(battery, 0, 1023, 0, 100);
 
-  if (batteryLevel != oldBatteryLevel) {      // if the battery level has changed
-    Serial.print("Battery Level % is now: "); // print it
-    Serial.println(batteryLevel);
-    batteryLevelChar.writeValue(batteryLevel);  // and update the battery level characteristic
-    oldBatteryLevel = batteryLevel;           // save the level for next comparison
-  }
-}
+//   if (batteryLevel != oldBatteryLevel) {      // if the battery level has changed
+//     Serial.print("Battery Level % is now: "); // print it
+//     Serial.println(batteryLevel);
+//     batteryLevelChar.writeValue(batteryLevel);  // and update the battery level characteristic
+//     oldBatteryLevel = batteryLevel;           // save the level for next comparison
+//   }
+// }
