@@ -36,18 +36,18 @@
 #define SENSOR_CHAR_UUID "fec40b26-757a-11ec-90d6-0242ac120003"
 #define BATTERY_CHAR_UUID "fec40dc4-757a-11ec-90d6-0242ac120003"
 //********************************************************************
-uint8_t location = LEFT_LEG;
+uint8_t location = LEFT_ARM;
 
 // BLE Service (NOTE: Consider moving into setup() to reduce dynamic memory)
 BLEService sensorService(CONNECT_UUID);
 
 // BLE Sensor Data Characteristic
-BLEUnsignedCharCharacteristic sensorChar(SENSOR_CHAR_UUID,  // standard 16-bit characteristic UUID
+BLEFloatCharacteristic sensorChar(SENSOR_CHAR_UUID,  // standard 16-bit characteristic UUID
     BLERead | BLENotify); // remote clients will be able to get notifications if this characteristic changes
 
 
 // BLE Battery Level Characteristic
-BLEUnsignedCharCharacteristic batteryChar(BATTERY_CHAR_UUID,  // standard 16-bit characteristic UUID
+BLEIntCharacteristic batteryChar(BATTERY_CHAR_UUID,  // standard 16-bit characteristic UUID
     BLERead | BLENotify); // remote clients will be able to get notifications if this characteristic changes
 
 // Battery global variables
@@ -75,6 +75,7 @@ void setup() {
   sensorService.addCharacteristic(sensorChar); // add the sensor characteristic
   sensorService.addCharacteristic(batteryChar); // add the battery characteristic
   BLE.addService(sensorService); // Add the connection service
+  sensorChar.writeValue(float(location));
 
   /* Start advertising BLE.  It will start continuously transmitting BLE
      advertising packets and will be visible to remote BLE central devices
