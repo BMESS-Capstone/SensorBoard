@@ -24,7 +24,6 @@
 
 //*****Shared with NANO 33 TODO: move to a common refererred .h file***
 #define BATTERY_INTERVAL_MS 2000
-#define SENSOR_TRANSMISSiON_WAIT_MS 2000
 
 #define TOTAL_POSSIBLE_LOCATIONS 4
 #define LEFT_ARM 0
@@ -53,8 +52,7 @@ BLEIntCharacteristic batteryChar(BATTERY_CHAR_UUID,  // standard 16-bit characte
 
 // Battery global variables
 int oldBatteryLevel = 0;
-long previousBatMillis = 0;
-long previousSenMillis = 0;
+long previousMillis = 0;
 
 void setup() {
   Serial.begin(9600);    // initialize serial communication
@@ -100,20 +98,20 @@ void loop() {
     Serial.println(central.address());
     // turn on the LED to indicate the connection:
     digitalWrite(LED_BUILTIN, HIGH);
-    previousBatMillis = millis();
-    previousSenMillis = millis();
+    previousMillis = millis();
 
     // while the central is connected:
     while (central.connected()) {
       //**********IR Sensor*****************
-      if (sensorChar.subscribed() && millis() - previousBatMillis > SENSOR_TRANSMISSiON_WAIT_MS) {
+      if (sensorChar.subscribed()) {
+        Serial.println("I'm here");
         sensorChar.writeValue(readSensor());
       }
 
       //**********BATERY*****************
-      // if 2000ms have passed, check the battery level:
-      if (batteryChar.subscribed() && millis() - previousBatMillis > BATTERY_INTERVAL_MS) {
-        previousBatMillis = millis();
+      // if some interval time has passed, check the battery level:
+      if (batteryChar.subscribed() && millis() - previousMillis > BATTERY_INTERVAL_MS) {
+        previousMillis = millis();
         updateBatteryLevel();
       }
     }
@@ -121,6 +119,9 @@ void loop() {
     digitalWrite(LED_BUILTIN, LOW);
     Serial.print("Disconnected from central: ");
     Serial.println(central.address());
+
+    // Reset the location
+    sensorChar.writeValue(float(location));
   }
 }
 
