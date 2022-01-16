@@ -108,8 +108,7 @@ void loop() {
       //**********IR Sensor*****************
       if (sensorChar.subscribed()) {
         sensorChar.writeValue(readSensor());
-        float value = 0;
-        sensorChar.readValue(&value, sizeof(value));
+        Serial.println(sensorChar.value());
       }
 
       //**********BATERY*****************
