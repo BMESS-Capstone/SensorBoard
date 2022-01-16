@@ -101,16 +101,23 @@ void loop() {
     Serial.println(central.address());
     // turn on the LED to indicate the connection:
     digitalWrite(LED_BUILTIN, HIGH);
+    previousMillis = millis();
 
-    // check the battery level every 200ms
     // while the central is connected:
     while (central.connected()) {
+      //**********IR Sensor*****************
+      if (sensorChar.subscribed()) {
+        sensorChar.writeValue(readSensor());
+        float value = 0;
+        sensorChar.readValue(&value, sizeof(value));
+      }
+
       //**********BATERY*****************
       long currentMillis = millis();
       // if 200ms have passed, check the battery level:
-      if (currentMillis - previousMillis >= 200) {
+      if (batteryChar.subscribed() && currentMillis - previousMillis >= 2000) {
         previousMillis = currentMillis;
-        // updateBatteryLevel();
+        updateBatteryLevel();
       }
     }
     // when the central disconnects, turn off the LED:
@@ -120,17 +127,23 @@ void loop() {
   }
 }
 
-// void updateBatteryLevel() {
-//   /* Read the current voltage level on the A0 analog input pin.
-//      This is used here to simulate the charge level of a battery.
-//   */
-//   int battery = analogRead(A0);
-//   int batteryLevel = map(battery, 0, 1023, 0, 100);
+void updateBatteryLevel() {
+  /* Read the current voltage level on the A0 analog input pin.
+     This is used here to simulate the charge level of a battery.
+  */
+  int battery = analogRead(A0);
+  int batteryLevel = map(battery, 0, 1023, 0, 100);
 
-//   if (batteryLevel != oldBatteryLevel) {      // if the battery level has changed
-//     Serial.print("Battery Level % is now: "); // print it
-//     Serial.println(batteryLevel);
-//     batteryLevelChar.writeValue(batteryLevel);  // and update the battery level characteristic
-//     oldBatteryLevel = batteryLevel;           // save the level for next comparison
-//   }
-// }
+  if (batteryLevel != oldBatteryLevel) {      // if the battery level has changed
+    Serial.print("Battery Level % is now: "); // print it
+    Serial.println(batteryLevel);
+    batteryChar.writeValue(batteryLevel);  // and update the battery level characteristic
+    oldBatteryLevel = batteryLevel;           // save the level for next comparison
+  }
+}
+
+float readSensor() {
+  // TODO: Update to proper code
+  Serial.println(float(millis()));
+  return float(millis());
+}
