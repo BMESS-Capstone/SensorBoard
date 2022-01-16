@@ -4,7 +4,7 @@
   Service:
   - sensorService (service encapsulating various characteristics)
   - connectService (service to ensure the device is unique)
-  
+
   Characterstics for sensorService:
   - sensorChar (sensor value output)
   - batteryChar (battery voltage remaining)
@@ -14,7 +14,7 @@
 
   The circuit:
   - Arduino Nano 33 BLE or custom pIRfusiX PCB board
-  
+
   Interacts with the ESP32 BLE client firmware
 
   Author: Khaled Elmalawany
@@ -23,7 +23,8 @@
 #include <ArduinoBLE.h>
 
 //*****Shared with NANO 33 TODO: move to a common refererred .h file***
-#define BUFFER_SIZE 40
+#define BATTERY_INTERVAL_MS 2000
+#define SENSOR_TRANSMISSiON_WAIT_MS 2000
 
 #define TOTAL_POSSIBLE_LOCATIONS 4
 #define LEFT_ARM 0
@@ -43,16 +44,17 @@ BLEService sensorService(CONNECT_UUID);
 
 // BLE Sensor Data Characteristic
 BLEFloatCharacteristic sensorChar(SENSOR_CHAR_UUID,  // standard 16-bit characteristic UUID
-    BLERead | BLENotify); // remote clients will be able to get notifications if this characteristic changes
+                                  BLERead | BLENotify); // remote clients will be able to get notifications if this characteristic changes
 
 
 // BLE Battery Level Characteristic
 BLEIntCharacteristic batteryChar(BATTERY_CHAR_UUID,  // standard 16-bit characteristic UUID
-    BLERead | BLENotify); // remote clients will be able to get notifications if this characteristic changes
+                                 BLERead | BLENotify); // remote clients will be able to get notifications if this characteristic changes
 
 // Battery global variables
 int oldBatteryLevel = 0;
-long previousMillis = 0;
+long previousBatMillis = 0;
+long previousSenMillis = 0;
 
 void setup() {
   Serial.begin(9600);    // initialize serial communication
@@ -91,9 +93,6 @@ void loop() {
   // wait for a BLE central
   BLEDevice central = BLE.central();
 
-  // Variable to read inputs to BLE Characteristics
-  char temp[BUFFER_SIZE];
-
   // if a central is connected to the peripheral:
   if (central) {
     Serial.print("Connected to central: ");
@@ -101,21 +100,20 @@ void loop() {
     Serial.println(central.address());
     // turn on the LED to indicate the connection:
     digitalWrite(LED_BUILTIN, HIGH);
-    previousMillis = millis();
+    previousBatMillis = millis();
+    previousSenMillis = millis();
 
     // while the central is connected:
     while (central.connected()) {
       //**********IR Sensor*****************
-      if (sensorChar.subscribed()) {
+      if (sensorChar.subscribed() && millis() - previousBatMillis > SENSOR_TRANSMISSiON_WAIT_MS) {
         sensorChar.writeValue(readSensor());
-        Serial.println(sensorChar.value());
       }
 
       //**********BATERY*****************
-      long currentMillis = millis();
-      // if 200ms have passed, check the battery level:
-      if (batteryChar.subscribed() && currentMillis - previousMillis >= 2000) {
-        previousMillis = currentMillis;
+      // if 2000ms have passed, check the battery level:
+      if (batteryChar.subscribed() && millis() - previousBatMillis > BATTERY_INTERVAL_MS) {
+        previousBatMillis = millis();
         updateBatteryLevel();
       }
     }
@@ -143,6 +141,5 @@ void updateBatteryLevel() {
 
 float readSensor() {
   // TODO: Update to proper code
-  Serial.println(float(millis()));
   return float(millis());
 }
