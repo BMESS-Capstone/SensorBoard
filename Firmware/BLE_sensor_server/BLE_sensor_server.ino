@@ -23,8 +23,13 @@
 #include <ArduinoBLE.h>
 
 //*****Shared with NANO 33 TODO: move to a common refererred .h file***
+// Parameters only for Sensor
 #define BATTERY_INTERVAL_MS 2000
 
+// Parameters only for Gateway
+#define ONBOARD_LED 2
+
+// Shared parameters
 #define TOTAL_POSSIBLE_LOCATIONS 4
 #define LEFT_ARM 0
 #define RIGHT_ARM 1
@@ -104,7 +109,6 @@ void loop() {
     while (central.connected()) {
       //**********IR Sensor*****************
       if (sensorChar.subscribed()) {
-        Serial.println("I'm here");
         sensorChar.writeValue(readSensor());
       }
 
