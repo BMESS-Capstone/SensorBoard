@@ -25,6 +25,7 @@
 //*****Shared with NANO 33 TODO: move to a common refererred .h file***
 // Parameters only for Sensor
 #define BATTERY_INTERVAL_MS 2000
+#define BATTERY_PIN A0
 
 // Parameters only for Gateway
 #define ONBOARD_LED 2
@@ -130,10 +131,10 @@ void loop() {
 }
 
 void updateBatteryLevel() {
-  /* Read the current voltage level on the A0 analog input pin.
+  /* Read the current voltage level on the battery's analog input pin.
      This is used here to simulate the charge level of a battery.
   */
-  int battery = analogRead(A0);
+  int battery = analogRead(BATTERY_PIN);
   int batteryLevel = map(battery, 0, 1023, 0, 100);
 
   if (batteryLevel != oldBatteryLevel) {      // if the battery level has changed
@@ -146,5 +147,6 @@ void updateBatteryLevel() {
 
 float readSensor() {
   // TODO: Update to proper code
+  delay(50);
   return float(millis());
 }
