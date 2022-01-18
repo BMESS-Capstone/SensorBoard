@@ -42,7 +42,7 @@
 #define SENSOR_CHAR_UUID "fec40b26-757a-11ec-90d6-0242ac120003"
 #define BATTERY_CHAR_UUID "fec40dc4-757a-11ec-90d6-0242ac120003"
 //********************************************************************
-uint8_t location = LEFT_ARM;
+uint8_t location = RIGHT_ARM;
 
 // BLE Service (NOTE: Consider moving into setup() to reduce dynamic memory)
 BLEService sensorService(CONNECT_UUID);
