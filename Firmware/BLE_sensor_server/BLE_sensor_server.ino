@@ -81,7 +81,7 @@ void setup() {
   sensorService.addCharacteristic(sensorChar); // add the sensor characteristic
   sensorService.addCharacteristic(batteryChar); // add the battery characteristic
   BLE.addService(sensorService); // Add the connection service
-  sensorChar.writeValue(float(location));
+  batteryChar.writeValue(location);
 
   /* Start advertising BLE.  It will start continuously transmitting BLE
      advertising packets and will be visible to remote BLE central devices
@@ -126,7 +126,7 @@ void loop() {
     Serial.println(central.address());
 
     // Reset the location
-    sensorChar.writeValue(float(location));
+    batteryChar.writeValue(location);
   }
 }
 
