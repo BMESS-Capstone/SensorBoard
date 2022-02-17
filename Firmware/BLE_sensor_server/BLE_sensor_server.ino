@@ -26,6 +26,12 @@
 // Parameters only for Sensor
 #define BATTERY_INTERVAL_MS 2000
 #define BATTERY_PIN A0
+#define LED_PIN_RED 18 //verified
+#define LED_PIN_GREEN 3 //verified
+#define LED_PIN_BLUE 5 //verified
+#define ON LOW
+#define OFF HIGH
+
 
 // Parameters only for Gateway
 #define ONBOARD_LED 2
